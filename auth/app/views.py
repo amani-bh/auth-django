@@ -1,3 +1,4 @@
+from django.conf import settings
 from google.auth.transport import requests
 from google.oauth2 import id_token
 from rest_framework import status
@@ -9,13 +10,33 @@ from rest_framework.exceptions import APIException, AuthenticationFailed
 from .authentication import create_access_token, create_refresh_token, decode_access_token, decode_refresh_token
 from .serializers import UserSerializer
 from .models import User
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.urls import reverse
+
+from .tokens import account_activation_token
 
 
 class RegisterAPIView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user=serializer.save()
+        # Send verification email
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = account_activation_token.make_token(user)
+        activate_url = reverse('activate', kwargs={'uidb64': uidb64, 'token': token})
+        activate_url = request.build_absolute_uri(activate_url)
+
+        send_mail(
+            'Activate your account',
+            f'Hi {user.first_name}, please activate your account by clicking on the link below: {activate_url}',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
         return Response(serializer.data)
 
 
@@ -121,3 +142,20 @@ class GoogleLoginView(APIView):
         except ValueError:
         # Invalid token
            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+# activate account
+class ActivationView(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(id=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return Response({'message': 'Activation successful!'}, status=status.HTTP_200_OK)
+
+        return Response({'message': 'Activation link is invalid!'}, status=status.HTTP_400_BAD_REQUEST)
