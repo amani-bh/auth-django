@@ -3,12 +3,17 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email','phone', 'password'] # fields needs to return in response
+        fields = ['id', 'first_name', 'last_name', 'email','phone', 'password', 'date_joined', "private", "image_url", "badge"] # fields needs to return in response
         extra_kwargs = {
-            'password': {'write_only': True}, # password will not return in response only write
-            'is_active': {'default': False}
+            #'password': {'write_only': True}, # password will not return in response only write
+            'is_active': {'default': False},
+            'date_joined': {'read_only': True},
+            'private': {'read_only': True},
+            'image_url': {'read_only': True},
+            'badge': {'read_only': True},
         }
 
 # use this function to hash the password when adding to database
@@ -17,5 +22,11 @@ class UserSerializer(serializers.ModelSerializer):
         instance = self.Meta.model(**validated_data)
         if password is not None:
             instance.set_password(password)
+        instance.save()
+        return instance
+
+    def update_password(self, instance, validated_data):
+        password = validated_data.get('password')
+        instance.set_password(password)
         instance.save()
         return instance

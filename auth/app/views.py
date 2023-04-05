@@ -31,7 +31,7 @@ class RegisterAPIView(APIView):
 
         send_mail(
             'Activate your account',
-            f'Hi {user.first_name}, please activate your account by clicking on the link below: {activate_url}',
+            f'Hi {user.first_name} {user.last_name}, please activate your account by clicking on the link below: {activate_url}',
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
@@ -46,6 +46,8 @@ class LoginAPIView(APIView):
 
         if not user:
             raise APIException('Invalid credentials!')
+        if not user.is_active:
+            raise APIException('Verify your mail !')
 
         if not user.check_password(request.data['password']):
             raise APIException('Invalid credentials!')
@@ -159,3 +161,50 @@ class ActivationView(APIView):
             return Response({'message': 'Activation successful!'}, status=status.HTTP_200_OK)
 
         return Response({'message': 'Activation link is invalid!'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ImageUploadView(APIView):
+    def post(self, request):
+        image_url = request.data.get('image_url')
+        id = request.data.get('id')
+        try:
+            user = User.objects.filter(pk=id).first()
+            user.image_url=image_url
+            user.save()
+            return Response({'message': 'Image uploaded successfully!'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateProfile(APIView):
+    def post(self, request):
+        first_name = request.data.get('first_name')
+        id = request.data.get('id')
+        last_name = request.data.get('last_name')
+        phone = request.data.get('phone')
+        email = request.data.get('email')
+        try:
+            user = User.objects.filter(pk=id).first()
+            user.first_name = first_name
+            user.last_name = last_name
+            user.phone = phone
+            user.email = email
+            user.save()
+            return Response({'message': 'User updated successfully!'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdatePassword(APIView):
+    def post(self, request):
+        id = request.data.get('id')
+        password = request.data.get('password')
+        try:
+            user = User.objects.filter(pk=id).first()
+            serializer=UserSerializer(user, data={'password': password}, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.update_password(user, serializer.validated_data)
+            return Response({'message': 'Password updated successfully!'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+
