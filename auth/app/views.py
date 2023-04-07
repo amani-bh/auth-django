@@ -171,7 +171,7 @@ class ImageUploadView(APIView):
             user = User.objects.filter(pk=id).first()
             user.image_url=image_url
             user.save()
-            return Response({'message': 'Image uploaded successfully!'}, status=status.HTTP_200_OK)
+            return Response(UserSerializer(user).data)
         except User.DoesNotExist:
             return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,12 +185,12 @@ class UpdateProfile(APIView):
         email = request.data.get('email')
         try:
             user = User.objects.filter(pk=id).first()
-            user.first_name = first_name
-            user.last_name = last_name
-            user.phone = phone
-            user.email = email
-            user.save()
-            return Response({'message': 'User updated successfully!'}, status=status.HTTP_200_OK)
+            serializer=UserSerializer(user, data={'first_name': first_name,'last_name':last_name,
+             'phone' :phone, 'email' :email  }, partial=True)
+            serializer.is_valid(raise_exception=True)
+            user=serializer.save()
+            return Response(UserSerializer(user).data)
+
         except User.DoesNotExist:
             return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
 
