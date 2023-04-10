@@ -114,6 +114,7 @@ class GoogleLoginView(APIView):
             email = idinfo['email']
             first_name = idinfo.get('given_name', '')
             last_name = idinfo.get('family_name', '')
+            image_url=idinfo.get('picture', '')
 
             # Check if user already exists
             try:
@@ -124,11 +125,12 @@ class GoogleLoginView(APIView):
                         "email": email,
                         "first_name": first_name,
                         "last_name": last_name,
-                        "phone":"21333",
-                        "password":"123"
+                        "phone": "21333",
+                        "password": "123",
+                        "image_url": image_url
                     })
                  serializer.is_valid(raise_exception=True)
-                 user=serializer.save()
+                 user = serializer.save()
 
             # Set is_active to True
             user.is_active = True
