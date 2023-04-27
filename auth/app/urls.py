@@ -1,4 +1,6 @@
 from django.urls import path
+
+from . import views
 from .views import RegisterAPIView, LoginAPIView, UserAPIView, RefreshAPIView, LogoutAPIView, GoogleLoginView, \
     ActivationView, ImageUploadView, UpdateProfile, UpdatePassword
 
@@ -13,4 +15,5 @@ urlpatterns = [
     path('uploadImage', ImageUploadView.as_view()),
     path('updateProfile', UpdateProfile.as_view()),
     path('updatePassword', UpdatePassword.as_view()),
+    path('getUser', views.get_user, name="get_user"),
 ]

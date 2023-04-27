@@ -3,6 +3,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from rest_framework import status
 from rest_framework.authentication import get_authorization_header
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import APIException, AuthenticationFailed
@@ -209,4 +210,30 @@ class UpdatePassword(APIView):
             return Response({'message': 'Password updated successfully!'}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserAPIView(APIView):
+    def get(self, request):
+        auth = get_authorization_header(request).split()
+
+        if auth and len(auth) == 2:
+            token = auth[1].decode('utf-8')
+            id = decode_access_token(token)
+
+            user = User.objects.filter(pk=id).first()
+
+            return Response(UserSerializer(user).data)
+
+        raise AuthenticationFailed('unauthenticated')
+
+
+@api_view(['GET'])
+def get_user(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return Response(UserSerializer(user).data)
+
+
 
