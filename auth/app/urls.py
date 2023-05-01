@@ -15,5 +15,5 @@ urlpatterns = [
     path('uploadImage', ImageUploadView.as_view()),
     path('updateProfile', UpdateProfile.as_view()),
     path('updatePassword', UpdatePassword.as_view()),
-    path('getUser', views.get_user, name="get_user"),
+    path('get_user/<int:id>/', views.get_user, name="get_user"),
 ]

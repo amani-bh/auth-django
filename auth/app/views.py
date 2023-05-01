@@ -228,12 +228,14 @@ class UserAPIView(APIView):
 
 
 @api_view(['GET'])
-def get_user(request, user_id):
+def get_user(request, id):
     try:
-        user = User.objects.get(pk=user_id)
+        user = User.objects.get(pk=id)
+        return Response(UserSerializer(user).data)
+
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    return Response(UserSerializer(user).data)
+
 
 
 
