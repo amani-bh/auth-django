@@ -6,14 +6,9 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email','phone', 'password', 'date_joined', "private", "image_url", "badge"] # fields needs to return in response
+        fields = '__all__'  # fields needs to return in response
         extra_kwargs = {
-            #'password': {'write_only': True}, # password will not return in response only write
-            'is_active': {'default': False},
             'date_joined': {'read_only': True},
-            'private': {'read_only': True},
-            'image_url': {'read_only': True},
-            'badge': {'read_only': True},
         }
 
 # use this function to hash the password when adding to database

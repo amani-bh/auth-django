@@ -33,6 +33,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
+      <object connection-id="edf9293b-db01-4367-9615-d248872dab0c" object-ref="schemas/public/tables/app_user_followers" />
       <object connection-id="edf9293b-db01-4367-9615-d248872dab0c" object-ref="schemas/public/tables/app_user" />
     </open-files>
   </component>
@@ -40,6 +41,8 @@
     <connection id="edf9293b-db01-4367-9615-d248872dab0c" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="edf9293b-db01-4367-9615-d248872dab0c" dataset="public.app_user_followers" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="edf9293b-db01-4367-9615-d248872dab0c" dataset="public.app_user_groups" active-filter-id="" />
     <filter-actions connection-id="edf9293b-db01-4367-9615-d248872dab0c" dataset="public.app_user" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.EditorStateManager">
