@@ -245,4 +245,11 @@ def all_users(request):
     return Response(serializer.data)
 
 
+@api_view(['GET'])
+def user_autocomplete(request):
+    query = request.query_params.get('query', '')
+    queryset = User.objects.filter(email__icontains=query)[:10]
+    serializer = UserSerializer(queryset, many=True)
+    return Response(serializer.data)
+
 

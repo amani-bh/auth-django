@@ -17,4 +17,5 @@ urlpatterns = [
     path('updatePassword', UpdatePassword.as_view()),
     path('get_user/<int:id>/', views.get_user, name="get_user"),
     path('all_users/', views.all_users ),
+    path('user_autocomplete/', views.user_autocomplete ),
 ]
