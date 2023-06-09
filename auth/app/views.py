@@ -24,7 +24,7 @@ class RegisterAPIView(APIView):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user=serializer.save()
-        # Send verification email
+
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = account_activation_token.make_token(user)
         activate_url = reverse('activate', kwargs={'uidb64': uidb64, 'token': token})
@@ -108,20 +108,17 @@ class GoogleLoginView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Specify the CLIENT_ID of the app that accesses the backend:
+
             idinfo = id_token.verify_oauth2_token(id_token1, requests.Request(), '767545735730-dbak9de0g63e2n8ou2vnuefgm0c74jvq.apps.googleusercontent.com')
 
-            # Get user information from idinfo
             email = idinfo['email']
             first_name = idinfo.get('given_name', '')
             last_name = idinfo.get('family_name', '')
             image_url=idinfo.get('picture', '')
 
-            # Check if user already exists
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                # Create new user
                  serializer = UserSerializer(data={
                         "email": email,
                         "first_name": first_name,
@@ -133,10 +130,10 @@ class GoogleLoginView(APIView):
                  serializer.is_valid(raise_exception=True)
                  user = serializer.save()
 
-            # Set is_active to True
+
             user.is_active = True
             user.save()
-            # Generate JWT token and send in response
+
             access_token = create_access_token(user.id)
             refresh_token = create_refresh_token(user.id)
             response = Response()
@@ -145,7 +142,6 @@ class GoogleLoginView(APIView):
             return response
 
         except ValueError:
-        # Invalid token
            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 

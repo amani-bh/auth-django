@@ -5,10 +5,10 @@ from .views import RegisterAPIView, LoginAPIView, UserAPIView, RefreshAPIView, L
     ActivationView, ImageUploadView, UpdateProfile, UpdatePassword
 
 urlpatterns = [
-    path('register', RegisterAPIView.as_view()),
-    path('login', LoginAPIView.as_view()),
-    path('user', UserAPIView.as_view()),
-    path('refresh', RefreshAPIView.as_view()),
+    path('register', RegisterAPIView.as_view(), name='register'),
+    path('login', LoginAPIView.as_view(), name='login'),
+    path('user', UserAPIView.as_view(), name='user'),
+    path('refresh', RefreshAPIView.as_view(), name='refresh'),
     path('logout', LogoutAPIView.as_view()),
     path('googleRegister', GoogleLoginView.as_view(), name='google_login_view'),
     path('activate/<uidb64>/<token>/', ActivationView.as_view(), name='activate'),
