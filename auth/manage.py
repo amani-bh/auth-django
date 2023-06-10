@@ -3,7 +3,15 @@
 import os
 import sys
 from django.core.management.commands.runserver import Command as runserver
+import py_eureka_client.eureka_client as eureka_client
 
+def eureka_init():
+    eureka_client.init(
+        eureka_server="http://localhost:8761",
+        app_name="auth-service",
+        instance_host="localhost",
+        instance_port=8002,
+    )
 
 def main():
     runserver.default_port = "8002"
@@ -21,4 +29,5 @@ def main():
 
 
 if __name__ == '__main__':
+    eureka_init()
     main()
