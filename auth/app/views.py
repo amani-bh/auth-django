@@ -19,6 +19,9 @@ from django.urls import reverse
 from .tokens import account_activation_token
 
 
+user_not_found='user not found'
+
+
 class RegisterAPIView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -69,23 +72,19 @@ class LoginAPIView(APIView):
 class UserAPIView(APIView):
     def get(self, request):
         auth = get_authorization_header(request).split()
-
         if auth and len(auth) == 2:
             token = auth[1].decode('utf-8')
-            id = decode_access_token(token)
-
-            user = User.objects.filter(pk=id).first()
-
+            user_id = decode_access_token(token)
+            user = User.objects.filter(pk=user_id).first()
             return Response(UserSerializer(user).data)
-
         raise AuthenticationFailed('unauthenticated')
 
 
 class RefreshAPIView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refreshToken')
-        id = decode_refresh_token(refresh_token)
-        access_token = create_access_token(id)
+        user_id = decode_refresh_token(refresh_token)
+        access_token = create_access_token(user_id)
         return Response({
             'token': access_token
         })
@@ -165,62 +164,46 @@ class ActivationView(APIView):
 class ImageUploadView(APIView):
     def post(self, request):
         image_url = request.data.get('image_url')
-        id = request.data.get('id')
+        user_id = request.data.get('id')
         try:
-            user = User.objects.filter(pk=id).first()
-            user.image_url=image_url
+            user = User.objects.filter(pk=user_id).first()
+            user.image_url = image_url
             user.save()
             return Response(UserSerializer(user).data)
         except User.DoesNotExist:
-            return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': user_not_found}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateProfile(APIView):
     def post(self, request):
         first_name = request.data.get('first_name')
-        id = request.data.get('id')
+        user_id = request.data.get('id')
         last_name = request.data.get('last_name')
         phone = request.data.get('phone')
         email = request.data.get('email')
         try:
-            user = User.objects.filter(pk=id).first()
-            serializer=UserSerializer(user, data={'first_name': first_name,'last_name':last_name,
-             'phone' :phone, 'email' :email  }, partial=True)
+            user = User.objects.filter(pk=user_id).first()
+            serializer = UserSerializer(user, data={'first_name': first_name, 'last_name': last_name,
+                                                    'phone': phone, 'email': email}, partial=True)
             serializer.is_valid(raise_exception=True)
-            user=serializer.save()
+            user = serializer.save()
             return Response(UserSerializer(user).data)
-
         except User.DoesNotExist:
-            return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': user_not_found}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdatePassword(APIView):
     def post(self, request):
-        id = request.data.get('id')
+        user_id = request.data.get('id')
         password = request.data.get('password')
         try:
-            user = User.objects.filter(pk=id).first()
-            serializer=UserSerializer(user, data={'password': password}, partial=True)
+            user = User.objects.filter(pk=user_id).first()
+            serializer = UserSerializer(user, data={'password': password}, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.update_password(user, serializer.validated_data)
             return Response({'message': 'Password updated successfully!'}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
-            return Response({'error': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserAPIView(APIView):
-    def get(self, request):
-        auth = get_authorization_header(request).split()
-
-        if auth and len(auth) == 2:
-            token = auth[1].decode('utf-8')
-            id = decode_access_token(token)
-
-            user = User.objects.filter(pk=id).first()
-
-            return Response(UserSerializer(user).data)
-
-        raise AuthenticationFailed('unauthenticated')
+            return Response({'error': user_not_found}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -231,7 +214,6 @@ def get_user(request, id):
 
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
 
 
 @api_view(['GET'])
