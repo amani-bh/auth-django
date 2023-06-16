@@ -218,7 +218,7 @@ def get_user(request, id):
 
 @api_view(['GET'])
 def all_users(request):
-    users = User.objects.all()
+    users = User.objects.filter(is_active=True)
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
@@ -228,6 +228,16 @@ def user_autocomplete(request):
     query = request.query_params.get('query', '')
     queryset = User.objects.filter(email__icontains=query)[:10]
     serializer = UserSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def disable_user(request,id):
+    user = User.objects.get(pk=id)
+    user.is_active=False
+    user.save()
+    users = User.objects.filter(is_active=True)
+    serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
 
