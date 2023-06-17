@@ -19,4 +19,5 @@ urlpatterns = [
     path('all_users/', views.all_users ),
     path('user_autocomplete/', views.user_autocomplete ),
     path('disable_user/<int:id>', views.disable_user ),
+    path('points_user/<int:id>', views.points_user ),
 ]

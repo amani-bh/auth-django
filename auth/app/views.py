@@ -241,3 +241,20 @@ def disable_user(request,id):
     return Response(serializer.data)
 
 
+@api_view(['GET'])
+def points_user(request, id):
+    user = User.objects.get(pk=id)
+    user.points += 5
+    if user.points >= 100:
+        user.badge='Responder'
+    elif user.points >= 200:
+        user.badge='Contributor'
+    elif user.points >= 500:
+        user.badge='Expert'
+
+    user.save()
+
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
+
+

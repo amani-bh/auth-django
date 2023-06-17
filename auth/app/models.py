@@ -12,6 +12,7 @@ class User(AbstractUser):
     private = models.BooleanField(default=False)
     img_name = models.CharField(max_length=255, default="default_image.png")
     followers_number = models.PositiveIntegerField(default=0)
+    points = models.PositiveIntegerField(default=0)
     image_url = models.URLField(default="https://firebasestorage.googleapis.com/v0/b/ska-capgemini.appspot.com/o/images%2Fprofil-icon.png?alt=media&token=c7b30569-abc2-429c-a102-121229e26aed")
     username = None
 
