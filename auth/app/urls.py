@@ -20,4 +20,7 @@ urlpatterns = [
     path('user_autocomplete/', views.user_autocomplete ),
     path('disable_user/<int:id>', views.disable_user ),
     path('points_user/<int:id>', views.points_user ),
+    path('add_notification/<int:id>', views.add_notification ),
+    path('all_notification/<int:id>', views.all_notification ),
+    path('seen_notification', views.seen_notification ),
 ]

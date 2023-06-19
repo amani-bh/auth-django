@@ -9,8 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import APIException, AuthenticationFailed
 
 from .authentication import create_access_token, create_refresh_token, decode_access_token, decode_refresh_token
-from .serializers import UserSerializer
-from .models import User
+from .serializers import UserSerializer, NotificationSerializer
+from .models import User, Notification
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
@@ -257,4 +257,44 @@ def points_user(request, id):
     serializer = UserSerializer(user)
     return Response(serializer.data)
 
+
+@api_view(['POST'])
+def add_notification(request, id):
+    try:
+        user = User.objects.get(pk=id)
+        serializer=NotificationSerializer(data={
+            'user':user.id,
+            'message':request.data['message']
+        })
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors ,status=status.HTTP_400_BAD_REQUEST)
+
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def all_notification(request, id):
+    user = User.objects.get(pk=id)
+    notifications= Notification.objects.filter(user=user, seen=False).order_by('-created_at')
+    if notifications:
+        serializer=NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+    else:
+        return Response([])
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def seen_notification(request):
+    notif_data=request.data['notifications']
+    for notif in notif_data:
+        update_notif=Notification.objects.get(pk=notif['id'])
+        update_notif.seen=True
+        update_notif.save()
+    return Response(status=status.HTTP_200_OK)
 

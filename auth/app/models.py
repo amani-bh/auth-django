@@ -41,3 +41,10 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+
+class Notification(models.Model):
+        user = models.ForeignKey(User, on_delete=models.CASCADE)
+        message = models.CharField(max_length=255)
+        seen = models.BooleanField(default=False)
+        created_at = models.DateTimeField(auto_now_add=True)
