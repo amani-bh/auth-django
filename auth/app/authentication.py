@@ -5,7 +5,7 @@ def create_access_token(id):
     try:
         return jwt.encode({
             'user_id': id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
             'iat': datetime.datetime.utcnow()
         }, 'access_secret', algorithm='HS256')
     except jwt.PyJWTError:

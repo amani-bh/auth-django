@@ -30,12 +30,11 @@ class RegisterAPIView(APIView):
 
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = account_activation_token.make_token(user)
-        activate_url = reverse('activate', kwargs={'uidb64': uidb64, 'token': token})
-        activate_url = request.build_absolute_uri(activate_url)
+        join_url = f"http://localhost:3001/activate/{uidb64}/{token}"
 
         send_mail(
             'Activate your account',
-            f'Hi {user.first_name} {user.last_name}, please activate your account by clicking on the link below: {activate_url}',
+            f'Hi {user.first_name} {user.last_name}, please activate your account by clicking on the link below: {join_url}',
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
